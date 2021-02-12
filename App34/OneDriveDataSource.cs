@@ -14,48 +14,47 @@ namespace App34
     /// </summary>
     public static class OneDriveDataSource
     {
-        private static readonly string rootFolderId = "foo";
         private static DriveItem defaultRootFolder = new DriveItem
         {
             Name = "My Awesome Notes App",
-            Folder = new Folder
+            Folder = new Folder(),
+            AdditionalData = new Dictionary<string, object>()
             {
-
+                { "@microsoft.graph.conflictBehavior", "rename" }
             }
-
         };
 
 
         private static GraphServiceClient _graph => ProviderManager.Instance.GlobalProvider.Graph;
 
 
-        public static async Task<DriveItem> GetRootFolder()
+        //public static async Task<DriveItem> GetRootFolder()
+        //{
+        //    DriveItem rootFolder;
+        //    try
+        //    {
+        //        rootFolder = await _graph.Me.Drive.Root.Children[rootFolderId].Request().GetAsync();
+        //    }
+        //    catch
+        //    {
+        //        // TODO: Create the appRootFolder
+        //        rootFolder = await CreateRootFolder(defaultRootFolder);
+        //    }
+
+        //    return rootFolder;
+        //}
+
+        public static async Task<DriveItem> GetOrCreateRootFolder()
         {
             DriveItem rootFolder;
-            try
-            {
-                rootFolder = await _graph.Me.Drive.Root.Children[rootFolderId].Request().GetAsync();
-            }
-            catch
-            {
-                // TODO: Create the appRootFolder
-                rootFolder = await CreateRootFolder(defaultRootFolder);
-            }
-
-            return rootFolder;
-        }
-
-        public static async Task<DriveItem> CreateRootFolder(DriveItem driveItem)
-        {
-            DriveItem rootFolder;
 
             try
             {
-                rootFolder = await _graph.Me.Drive.Root.Children.Request().AddAsync(driveItem);
+                rootFolder = await _graph.Me.Drive.Root.Children.Request().AddAsync(defaultRootFolder);
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine("Failed to create approot folder" + e.Message);
+                System.Diagnostics.Debug.WriteLine("Failed to get or create root folder" + e.Message);
                 rootFolder = null;
             }
 

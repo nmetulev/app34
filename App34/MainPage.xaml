@@ -16,7 +16,7 @@
                 <RowDefinition Height="*"></RowDefinition>
             </Grid.RowDefinitions>
             <TextBlock Text="My Note taking app"></TextBlock>
-            <StackPanel x:Name="CustomEditRoot" BorderThickness="2" Grid.Row="1" Margin="20" Padding="10"></StackPanel>
+            <local:MyEditBox x:Name="myEditBox"></local:MyEditBox>
         </Grid>
     </Grid>
 </Page>

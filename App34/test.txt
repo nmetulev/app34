@@ -1,0 +1,12 @@
+﻿This is a test of a note
+
+I just want to be able to do todo, this is a really long text that I just want to edit here, let's see if it wraps
+
+todo: do this
+todo: do that
+
+here is something else
+
+todo: there is more
+
+bla

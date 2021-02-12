@@ -43,7 +43,7 @@ namespace App34
             this.InitializeComponent();
 
             ProviderManager.Instance.ProviderUpdated += Instance_ProviderUpdated;
-            ProviderManager.Instance.GlobalProvider = WindowsProvider.Create("2fc98686-0464-42a2-ae3e-7f45c8c8257d", new string[] { "User.Read" });
+            ProviderManager.Instance.GlobalProvider = WindowsProvider.Create("2fc98686-0464-42a2-ae3e-7f45c8c8257d", new string[] { "User.Read", "Tasks.ReadWrite" });
 
 
             Init();
@@ -66,6 +66,31 @@ namespace App34
             var text = await FileIO.ReadTextAsync(file);
 
             myEditBox.Text = text;
+        }
+
+        private void CreateTodo()
+        {
+
+        }
+
+        private void CompleteTodo()
+        {
+
+        }
+
+        private void UncompleteTodo()
+        {
+
+        }
+
+        private void UpdateTodoTitle()
+        {
+
+        }
+
+        private void DeleteTodo()
+        {
+
         }
     }
 }

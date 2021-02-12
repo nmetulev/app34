@@ -24,25 +24,7 @@ namespace App34
             }
         };
 
-
         private static GraphServiceClient _graph => ProviderManager.Instance.GlobalProvider.Graph;
-
-
-        //public static async Task<DriveItem> GetRootFolder()
-        //{
-        //    DriveItem rootFolder;
-        //    try
-        //    {
-        //        rootFolder = await _graph.Me.Drive.Root.Children[rootFolderId].Request().GetAsync();
-        //    }
-        //    catch
-        //    {
-        //        // TODO: Create the appRootFolder
-        //        rootFolder = await CreateRootFolder(defaultRootFolder);
-        //    }
-
-        //    return rootFolder;
-        //}
 
         public static async Task<DriveItem> GetOrCreateRootFolder()
         {
@@ -50,7 +32,7 @@ namespace App34
 
             try
             {
-                rootFolder = await _graph.Me.Drive.Root.Children.Request().AddAsync(defaultRootFolder);
+                rootFolder = await _graph.Me.Drive.Special.AppRoot.Children.Request().AddAsync(defaultRootFolder);
             }
             catch (Exception e)
             {

@@ -43,7 +43,7 @@ namespace App34
             this.InitializeComponent();
 
             ProviderManager.Instance.ProviderUpdated += Instance_ProviderUpdated;
-            ProviderManager.Instance.GlobalProvider = WindowsProvider.Create("2fc98686-0464-42a2-ae3e-7f45c8c8257d", new string[] { "User.Read", "Tasks.ReadWrite", "Files.ReadWrite.All" });
+            ProviderManager.Instance.GlobalProvider = WindowsProvider.Create("2fc98686-0464-42a2-ae3e-7f45c8c8257d", new string[] { "User.Read", "Tasks.ReadWrite", "Files.ReadWrite" });
 
 
             Init();

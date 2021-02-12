@@ -7,15 +7,15 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="d6912432-3cc3-4797-83f8-3b3ce3d6ed0a"
-    Publisher="CN=nikol"
+    Name="4620NikDev.awesomenotesapsoss"
+    Publisher="CN=F66EF699-F6EE-4B4F-908B-A45D598C9BA2"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="d6912432-3cc3-4797-83f8-3b3ce3d6ed0a" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="322ff1cb-8de6-4ccf-9c92-0c8c47fdd7f2" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>App34</DisplayName>
-    <PublisherDisplayName>nikol</PublisherDisplayName>
+    <DisplayName>awesome notes apsoss</DisplayName>
+    <PublisherDisplayName>metulev</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -32,7 +32,7 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="App34.App">
       <uap:VisualElements
-        DisplayName="App34"
+        DisplayName="awesome notes apsoss"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
         Description="App34"

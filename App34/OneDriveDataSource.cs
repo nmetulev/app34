@@ -14,29 +14,60 @@ namespace App34
     /// </summary>
     public static class OneDriveDataSource
     {
-        private static readonly string AppRootFolderId = "foo";
-        
+        private static readonly string rootFolderId = "foo";
+        private static DriveItem defaultRootFolder = new DriveItem
+        {
+            Name = "My Awesome Notes App",
+            Folder = new Folder
+            {
+
+            }
+
+        };
+
+
         private static GraphServiceClient _graph => ProviderManager.Instance.GlobalProvider.Graph;
 
 
-        public static async Task<DriveItem> GetAppRootFolder()
+        public static async Task<DriveItem> GetRootFolder()
         {
+            DriveItem rootFolder;
             try
             {
-                DriveItem appRootFolder = await _graph.Me.Drive.Special.AppRoot.Children[AppRootFolderId].Request().GetAsync();
+                rootFolder = await _graph.Me.Drive.Root.Children[rootFolderId].Request().GetAsync();
             }
             catch
             {
                 // TODO: Create the appRootFolder
+                rootFolder = await CreateRootFolder(defaultRootFolder);
             }
 
-            return null;
+            return rootFolder;
         }
 
-        public static async Task<DriveItem> CreateFileInAppRoot(DriveItem newItem, string fileId)
+        public static async Task<DriveItem> CreateRootFolder(DriveItem driveItem)
         {
-            DriveItem item = await _graph.Me.Drive.Special.AppRoot.Children[fileId].Request().CreateAsync(newItem);
-            return item;
+            DriveItem rootFolder;
+
+            try
+            {
+                rootFolder = await _graph.Me.Drive.Root.Children.Request().AddAsync(driveItem);
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine("Failed to create approot folder" + e.Message);
+                rootFolder = null;
+            }
+
+            return rootFolder;
+
+        }
+
+        public static async Task<DriveItem> CreateFileInRoot(DriveItem newItem, string fileId)
+        {
+            //DriveItem item = await _graph.Me.Drive.Special.AppRoot.Children[fileId].Request().CreateAsync(newItem);
+            //return item;
+            return null;
         }
 
         public static async void GetFileFromAppRoot(string fileId)

@@ -46,7 +46,7 @@ namespace App34
             this.InitializeComponent();
 
             ProviderManager.Instance.ProviderUpdated += Instance_ProviderUpdated;
-            ProviderManager.Instance.GlobalProvider = WindowsProvider.Create("2fc98686-0464-42a2-ae3e-7f45c8c8257d", new string[] { "User.Read", "Tasks.ReadWrite" });
+            ProviderManager.Instance.GlobalProvider = WindowsProvider.Create("2fc98686-0464-42a2-ae3e-7f45c8c8257d", new string[] { "User.Read", "Tasks.ReadWrite", "Files.ReadWrite.All" });
 
 
             Init();
@@ -59,6 +59,9 @@ namespace App34
                 if (ProviderManager.Instance.GlobalProvider is IProvider provider && provider.State == ProviderState.SignedIn) 
                 {
                     var user = await provider.Graph.Me.Request().GetAsync();
+
+                    var folder = await OneDriveDataSource.GetOrCreateRootFolder();
+                    System.Diagnostics.Debug.WriteLine(folder.Id);
                     await TestFlow();
                     
 

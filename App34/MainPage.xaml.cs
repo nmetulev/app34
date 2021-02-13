@@ -26,6 +26,9 @@ using Windows.UI;
 using Windows.UI.Xaml.Documents;
 using Microsoft.Toolkit.Graph.Providers.Uwp;
 using Microsoft.Toolkit.Graph.Providers;
+using System.Net.Http;
+using System.Collections.Specialized;
+
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -59,8 +62,18 @@ namespace App34
 
                     var folder = await OneDriveDataSource.GetOrCreateRootFolder();
                     System.Diagnostics.Debug.WriteLine(folder.Id);
+                    await TestFlow();
+                    
+
+
                 }
             }
+        }
+
+        private async Task TestFlow()
+        {
+            Microsoft.Graph.TodoTask todoTask = await CreateTodo("Do hackathon");
+            Microsoft.Graph.TodoTask todoTaskCompleted = await CompleteTodo(todoTask.Id);
         }
 
         private async Task Init()
@@ -69,16 +82,74 @@ namespace App34
             var text = await FileIO.ReadTextAsync(file);
 
             myEditBox.Text = text;
-        }
-
-        private void CreateTodo()
-        {
 
         }
 
-        private void CompleteTodo()
+        private async Task<Microsoft.Graph.TodoTaskList> CreateTodoList()
         {
+            var provider = ProviderManager.Instance.GlobalProvider;
+            Microsoft.Graph.TodoTaskList list = null;
+            var existingLists = await provider.Graph.Me.Todo.Lists.Request().Filter("displayName eq 'MyAwesomeNotesApp'").GetAsync();
+            if (existingLists.Count == 0)
+            {
+                //var list = await provider.Graph.Me.Todo.Lists.Request().AddAsync(new Microsoft.Graph.TodoTaskList { DisplayName = "MyAwesomeNotesApp" });
+                string requestUrl = provider.Graph.Me.Todo.Lists.Request().RequestUrl;
+                string json = "{\"displayName\": \"MyAwesomeNotesApp\"}";
+                HttpRequestMessage hrm = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+                hrm.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                await provider.Graph.AuthenticationProvider.AuthenticateRequestAsync(hrm);
+                HttpResponseMessage response = await provider.Graph.HttpProvider.SendAsync(hrm);
+                if (response.IsSuccessStatusCode)
+                {
+                    // Deserialize into OneNotePage object.
+                    var content = await response.Content.ReadAsStringAsync();
+                    list = provider.Graph.HttpProvider.Serializer.DeserializeObject<Microsoft.Graph.TodoTaskList>(content);
+                }
+            }
+            else
+            {
+                list = existingLists[0];
+            }
+            return list;
+        }
+        private async Task<Microsoft.Graph.TodoTask> CreateTodo(string task)
+        {
+            var provider = ProviderManager.Instance.GlobalProvider;
+            Microsoft.Graph.TodoTaskList todoList = await CreateTodoList();
+            Microsoft.Graph.TodoTask todoTask = null;
+            var requestUrl = provider.Graph.Me.Todo.Lists[todoList.Id].Tasks.Request().RequestUrl;
+            string taskjson = "{\"title\": \"" + task + "\"}";
+            HttpRequestMessage hrm = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+            hrm.Content = new StringContent(taskjson, System.Text.Encoding.UTF8, "application/json");
+            await provider.Graph.AuthenticationProvider.AuthenticateRequestAsync(hrm);
+            HttpResponseMessage response = await provider.Graph.HttpProvider.SendAsync(hrm);
+            if (response.IsSuccessStatusCode)
+            {
+                // Deserialize into OneNotePage object.
+                var content = await response.Content.ReadAsStringAsync();
+                todoTask = provider.Graph.HttpProvider.Serializer.DeserializeObject<Microsoft.Graph.TodoTask>(content);
+            }
+            return todoTask;
+        }
 
+        private async Task<Microsoft.Graph.TodoTask> CompleteTodo(string taskId)
+        {
+            var provider = ProviderManager.Instance.GlobalProvider;
+            Microsoft.Graph.TodoTask todoTask = null;
+            Microsoft.Graph.TodoTaskList todoList = await CreateTodoList();
+            var requestUrl = provider.Graph.Me.Todo.Lists[todoList.Id].Tasks[taskId].Request().RequestUrl;
+            string updatejson = "{\"status\": \"completed\"}";
+            HttpRequestMessage hrm = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+            hrm.Content = new StringContent(updatejson, System.Text.Encoding.UTF8, "application/json");
+            await provider.Graph.AuthenticationProvider.AuthenticateRequestAsync(hrm);
+            HttpResponseMessage response = await provider.Graph.HttpProvider.SendAsync(hrm);
+            if (response.IsSuccessStatusCode)
+            {
+                // Deserialize into OneNotePage object.
+                var content = await response.Content.ReadAsStringAsync();
+                todoTask = provider.Graph.HttpProvider.Serializer.DeserializeObject<Microsoft.Graph.TodoTask>(content);
+            }
+            return todoTask;
         }
 
         private void UncompleteTodo()

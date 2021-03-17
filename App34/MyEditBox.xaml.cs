@@ -38,6 +38,24 @@ namespace App34
 
         List<TextItem> _content;
 
+        public string GetTextFromContent()
+        {
+            string text = "";
+            foreach (var line in _content)
+            {
+                if (line is TodoTextItem)
+                {
+                    text += "todo: " + line.Text + '\n';
+                }
+                else
+                {
+                    text += line.Text + '\n';
+                }
+            }
+
+            return text;
+        }
+
         // If the _selection starts and ends at the same point,
         // then it represents the location of the caret (insertion point).
         CoreTextRange _selection;

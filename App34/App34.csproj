@@ -123,12 +123,14 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Common\JsonObjectSerializer.cs" />
+    <Compile Include="EditBoxTodoClient.cs" />
     <Compile Include="Helpers\RoamingSettings\IRoamingSettingsDataStore.cs" />
     <Compile Include="Helpers\RoamingSettings\OneDriveDataSource.cs" />
     <Compile Include="Helpers\RoamingSettings\OneDriveDataStore.cs" />
     <Compile Include="Helpers\RoamingSettings\RoamingSettingsHelper.cs" />
     <Compile Include="Helpers\RoamingSettings\UserExtensionDataStore.cs" />
     <Compile Include="Helpers\RoamingSettings\UserExtensionsDataSource.cs" />
+    <Compile Include="IEditBoxTodoClient.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>

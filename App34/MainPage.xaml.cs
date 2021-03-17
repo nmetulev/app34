@@ -1,9 +1,6 @@
 ﻿using App34.Helpers.RoamingSettings;
 using Microsoft.Toolkit.Graph.Providers;
-using System;
-using System.Net.Http;
 using System.Threading.Tasks;
-using Windows.Storage;
 using Windows.UI.Xaml.Controls;
 
 namespace App34
@@ -20,94 +17,112 @@ namespace App34
             InitializeComponent();
 
             DataContext = new MainViewModel();
+
+            ProviderManager.Instance.ProviderUpdated += Instance_ProviderUpdated;
+        }
+
+        private async void Instance_ProviderUpdated(object sender, ProviderUpdatedEventArgs e)
+        {
+            if (e.Reason == ProviderManagerChangedState.ProviderStateChanged)
+            {
+                if (ProviderManager.Instance.GlobalProvider is IProvider provider && provider.State == ProviderState.SignedIn) 
+                {
+                    await TestFlow();
+                }
+            }
         }
 
         private async Task TestFlow()
         {
-            Microsoft.Graph.TodoTask todoTask = await CreateTodo("Do hackathon");
-            Microsoft.Graph.TodoTask todoTaskCompleted = await CompleteTodo(todoTask.Id);
+            Microsoft.Graph.TodoTaskList todoTaskList = await CreateTodoList();
+            Microsoft.Graph.TodoTask todoTask = await CreateTodo("Do hackathon", todoTaskList.Id);
+            Microsoft.Graph.TodoTask todoTaskCompleted = await CompleteTodo(todoTask.Id, todoTaskList.Id);
+            Microsoft.Graph.TodoTask todoTaskUncompleted = await UncompleteTodo(todoTask.Id, todoTaskList.Id);
+            Microsoft.Graph.TodoTask todoTaskTitleChanged = await UpdateTodoTitle("Changed title", todoTask.Id, todoTaskList.Id);
+            DeleteTodo(todoTask.Id, todoTaskList.Id);
         }
 
         private async Task<Microsoft.Graph.TodoTaskList> CreateTodoList()
         {
             var provider = ProviderManager.Instance.GlobalProvider;
-            Microsoft.Graph.TodoTaskList list = null;
+            Microsoft.Graph.TodoTaskList todoTaskList = null;
             var existingLists = await provider.Graph.Me.Todo.Lists.Request().Filter("displayName eq 'MyAwesomeNotesApp'").GetAsync();
             if (existingLists.Count == 0)
             {
-                //var list = await provider.Graph.Me.Todo.Lists.Request().AddAsync(new Microsoft.Graph.TodoTaskList { DisplayName = "MyAwesomeNotesApp" });
-                string requestUrl = provider.Graph.Me.Todo.Lists.Request().RequestUrl;
-                string json = "{\"displayName\": \"MyAwesomeNotesApp\"}";
-                HttpRequestMessage hrm = new HttpRequestMessage(HttpMethod.Post, requestUrl);
-                hrm.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                await provider.Graph.AuthenticationProvider.AuthenticateRequestAsync(hrm);
-                HttpResponseMessage response = await provider.Graph.HttpProvider.SendAsync(hrm);
-                if (response.IsSuccessStatusCode)
+                var list = new Microsoft.Graph.TodoTaskList
                 {
-                    // Deserialize into OneNotePage object.
-                    var content = await response.Content.ReadAsStringAsync();
-                    list = provider.Graph.HttpProvider.Serializer.DeserializeObject<Microsoft.Graph.TodoTaskList>(content);
-                }
+                    ODataType = null,
+                    DisplayName = "MyAwesomeNotesApp"
+                };
+
+                todoTaskList = await provider.Graph.Me.Todo.Lists
+                    .Request()
+                    .AddAsync(list);
             }
             else
             {
-                list = existingLists[0];
+                todoTaskList = existingLists[0];
             }
-            return list;
+            return todoTaskList;
         }
-        private async Task<Microsoft.Graph.TodoTask> CreateTodo(string task)
+
+        private async Task<Microsoft.Graph.TodoTask> CreateTodo(string task, string todoListId)
         {
             var provider = ProviderManager.Instance.GlobalProvider;
-            Microsoft.Graph.TodoTaskList todoList = await CreateTodoList();
-            Microsoft.Graph.TodoTask todoTask = null;
-            var requestUrl = provider.Graph.Me.Todo.Lists[todoList.Id].Tasks.Request().RequestUrl;
-            string taskjson = "{\"title\": \"" + task + "\"}";
-            HttpRequestMessage hrm = new HttpRequestMessage(HttpMethod.Post, requestUrl);
-            hrm.Content = new StringContent(taskjson, System.Text.Encoding.UTF8, "application/json");
-            await provider.Graph.AuthenticationProvider.AuthenticateRequestAsync(hrm);
-            HttpResponseMessage response = await provider.Graph.HttpProvider.SendAsync(hrm);
-            if (response.IsSuccessStatusCode)
+ 
+            var todoTask = new Microsoft.Graph.TodoTask
             {
-                // Deserialize into OneNotePage object.
-                var content = await response.Content.ReadAsStringAsync();
-                todoTask = provider.Graph.HttpProvider.Serializer.DeserializeObject<Microsoft.Graph.TodoTask>(content);
-            }
+                ODataType = null,
+                Title = task,         
+            };
+            todoTask = await provider.Graph.Me.Todo.Lists[todoListId].Tasks
+            .Request()
+            .AddAsync(todoTask);
             return todoTask;
         }
 
-        private async Task<Microsoft.Graph.TodoTask> CompleteTodo(string taskId)
+        private async Task<Microsoft.Graph.TodoTask> CompleteTodo(string taskId, string todoListId)
         {
             var provider = ProviderManager.Instance.GlobalProvider;
-            Microsoft.Graph.TodoTask todoTask = null;
-            Microsoft.Graph.TodoTaskList todoList = await CreateTodoList();
-            var requestUrl = provider.Graph.Me.Todo.Lists[todoList.Id].Tasks[taskId].Request().RequestUrl;
-            string updatejson = "{\"status\": \"completed\"}";
-            HttpRequestMessage hrm = new HttpRequestMessage(HttpMethod.Post, requestUrl);
-            hrm.Content = new StringContent(updatejson, System.Text.Encoding.UTF8, "application/json");
-            await provider.Graph.AuthenticationProvider.AuthenticateRequestAsync(hrm);
-            HttpResponseMessage response = await provider.Graph.HttpProvider.SendAsync(hrm);
-            if (response.IsSuccessStatusCode)
+            var todoTask = new Microsoft.Graph.TodoTask
             {
-                // Deserialize into OneNotePage object.
-                var content = await response.Content.ReadAsStringAsync();
-                todoTask = provider.Graph.HttpProvider.Serializer.DeserializeObject<Microsoft.Graph.TodoTask>(content);
-            }
+                ODataType = null,
+                Status = Microsoft.Graph.TaskStatus.Completed
+            };
+            todoTask = await provider.Graph.Me.Todo.Lists[todoListId].Tasks[taskId].Request().UpdateAsync(todoTask);
             return todoTask;
         }
 
-        private void UncompleteTodo()
+        private async Task<Microsoft.Graph.TodoTask> UncompleteTodo(string taskId, string todoListId)
         {
-
+            var provider = ProviderManager.Instance.GlobalProvider;
+            var todoTask = new Microsoft.Graph.TodoTask
+            {
+                ODataType = null,
+                Status = Microsoft.Graph.TaskStatus.NotStarted
+            };
+            todoTask = await provider.Graph.Me.Todo.Lists[todoListId].Tasks[taskId].Request().UpdateAsync(todoTask);
+            return todoTask;
         }
 
-        private void UpdateTodoTitle()
+        private async Task<Microsoft.Graph.TodoTask> UpdateTodoTitle(string title, string taskId, string todoListId)
         {
-
+            var provider = ProviderManager.Instance.GlobalProvider;
+            var todoTask = new Microsoft.Graph.TodoTask
+            {
+                ODataType = null,
+                Title = title
+            };
+            todoTask = await provider.Graph.Me.Todo.Lists[todoListId].Tasks[taskId].Request().UpdateAsync(todoTask);
+            return todoTask;
         }
 
-        private void DeleteTodo()
+        private async void DeleteTodo(string taskId, string todoListId)
         {
-
+            var provider = ProviderManager.Instance.GlobalProvider;
+            await provider.Graph.Me.Todo.Lists[todoListId].Tasks[taskId]
+            .Request()
+            .DeleteAsync();
         }
     }
 }

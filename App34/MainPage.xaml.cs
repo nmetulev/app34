@@ -28,6 +28,7 @@ using Microsoft.Toolkit.Graph.Providers.Uwp;
 using Microsoft.Toolkit.Graph.Providers;
 using System.Net.Http;
 using System.Collections.Specialized;
+using App34.Helpers.RoamingSettings;
 
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
@@ -39,7 +40,7 @@ namespace App34
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        
+        public RoamingSettingsHelper _roamingSettings;
 
         public MainPage()
         {
@@ -47,7 +48,6 @@ namespace App34
 
             ProviderManager.Instance.ProviderUpdated += Instance_ProviderUpdated;
             ProviderManager.Instance.GlobalProvider = WindowsProvider.Create("2fc98686-0464-42a2-ae3e-7f45c8c8257d", new string[] { "User.Read", "Tasks.ReadWrite", "Files.ReadWrite" });
-
 
             Init();
         }
@@ -58,14 +58,9 @@ namespace App34
             {
                 if (ProviderManager.Instance.GlobalProvider is IProvider provider && provider.State == ProviderState.SignedIn) 
                 {
-                    var user = await provider.Graph.Me.Request().GetAsync();
+                    _roamingSettings = await RoamingSettingsHelper.CreateForCurrentUser(RoamingDataStore.OneDrive);
 
-                    var folder = await OneDriveDataSource.GetOrCreateRootFolder();
-                    System.Diagnostics.Debug.WriteLine(folder.Id);
-                    await TestFlow();
-                    
-
-
+                    //await TestFlow();
                 }
             }
         }

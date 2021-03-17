@@ -132,6 +132,7 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MainViewModel.cs" />
     <Compile Include="MyEditBox.xaml.cs">
       <DependentUpon>MyEditBox.xaml</DependentUpon>
     </Compile>

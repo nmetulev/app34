@@ -50,13 +50,12 @@ namespace App34
 
         // Using a DependencyProperty as the backing store for Text.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty TextProperty =
-            DependencyProperty.Register("Text", typeof(string), typeof(MyEditBox), new PropertyMetadata(string.Empty, TextChanged));
+            DependencyProperty.Register("Text", typeof(string), typeof(MyEditBox), new PropertyMetadata(null, TextChanged));
 
         private static void TextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is MyEditBox editBox)
             {
-
                 List<TextItem> items = new List<TextItem>();
 
                 foreach (var line in editBox.Text.Split('\n'))
@@ -138,32 +137,35 @@ namespace App34
 
             var root = new StackPanel();
 
-            for (int i = 0; i < _content.Count; i++)
+            if (_content != null)
             {
-                var line = _content[i];
-                FrameworkElement text;
+                for (int i = 0; i < _content.Count; i++)
+                {
+                    var line = _content[i];
+                    FrameworkElement text;
 
-                if (_currentLine == i)
-                {
-                    text = renderTextWithCaret(line.Text);
-                }
-                else
-                {
-                    text = new TextBlock()
+                    if (_currentLine == i)
                     {
-                        Text = line.Text,
-                        TextWrapping = TextWrapping.WrapWholeWords,
-                        FontSize = 14
-                    };
-                }
+                        text = renderTextWithCaret(line.Text);
+                    }
+                    else
+                    {
+                        text = new TextBlock()
+                        {
+                            Text = line.Text,
+                            TextWrapping = TextWrapping.WrapWholeWords,
+                            FontSize = 14
+                        };
+                    }
 
-                if (line is TodoTextItem item)
-                {
-                    root.Children.Add(renderTodoItem(text, item));
-                }
-                else
-                {
-                    root.Children.Add(text);
+                    if (line is TodoTextItem item)
+                    {
+                        root.Children.Add(renderTodoItem(text, item));
+                    }
+                    else
+                    {
+                        root.Children.Add(text);
+                    }
                 }
             }
 

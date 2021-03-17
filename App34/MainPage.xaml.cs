@@ -58,15 +58,11 @@ namespace App34
             {
                 if (ProviderManager.Instance.GlobalProvider is IProvider provider && provider.State == ProviderState.SignedIn) 
                 {
-<<<<<<< HEAD
                     var user = await provider.Graph.Me.Request().GetAsync();
 
                     var folder = await OneDriveDataSource.GetOrCreateRootFolder();
                     System.Diagnostics.Debug.WriteLine(folder.Id);
                     //await TestFlow();
-                    
-
-
                 }
             }
         }

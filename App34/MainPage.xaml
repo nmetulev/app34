@@ -6,10 +6,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    xmlns:providers="using:Microsoft.Toolkit.Graph.Providers"
     xmlns:graphcontrols="using:Microsoft.Toolkit.Graph.Controls"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls">
+    d:DataContext="{d:DesignInstance Type=local:MainViewModel}"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -18,7 +17,16 @@
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <TextBlock Text="My Note taking app"></TextBlock>
-        <graphcontrols:LoginButton Grid.Row="1"></graphcontrols:LoginButton>
-        <local:MyEditBox Grid.Row="2" x:Name="myEditBox"></local:MyEditBox>
+
+        <StackPanel Orientation="Horizontal" Padding="8">
+            <graphcontrols:LoginButton Grid.Row="1"></graphcontrols:LoginButton>
+            <Button Command="{Binding SaveCommand}">
+                <Button.Content>
+                    <SymbolIcon Symbol="Save" />
+                </Button.Content>
+            </Button>
+        </StackPanel>
+        
+        <local:MyEditBox Grid.Row="2" x:Name="myEditBox" Text="{Binding Text, Mode=TwoWay}"></local:MyEditBox>
     </Grid>
 </Page>

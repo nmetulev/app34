@@ -439,6 +439,11 @@ namespace App34
 
                     if (_currentLine < _content.Count - 1)
                     {
+                        if (_content[_currentLine] is TodoTextItem item)
+                        {
+                            item.Update();
+                        }
+
                         _currentLine++;
                         range.StartCaretPosition = Math.Min(_content[_currentLine].Text.Length, range.StartCaretPosition);
                         range.EndCaretPosition = range.StartCaretPosition;
@@ -451,6 +456,11 @@ namespace App34
 
                     if (_currentLine > 0)
                     {
+                        if (_content[_currentLine] is TodoTextItem item)
+                        {
+                            item.Update();
+                        }
+
                         _currentLine--;
                         range.StartCaretPosition = Math.Min(_content[_currentLine].Text.Length, range.StartCaretPosition);
                         range.EndCaretPosition = range.StartCaretPosition;
@@ -472,6 +482,12 @@ namespace App34
                     {
                         Text = right
                     });
+
+                    if (_content[_currentLine] is TodoTextItem item)
+                    {
+                        item.Update();
+                    }
+
                     _currentLine++;
 
                     range.StartCaretPosition = 0;

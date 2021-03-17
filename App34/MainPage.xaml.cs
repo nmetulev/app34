@@ -62,7 +62,7 @@ namespace App34
 
                     var folder = await OneDriveDataSource.GetOrCreateRootFolder();
                     System.Diagnostics.Debug.WriteLine(folder.Id);
-                    await TestFlow();
+                    //await TestFlow();
                     
 
 

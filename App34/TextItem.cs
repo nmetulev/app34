@@ -4,6 +4,13 @@ namespace App34
 {
     public class TextItem
     {
-        public string Text { get; set; }
+        private string _text;
+
+        public virtual string Text
+        {
+            get { return _text; }
+            set { _text = value; }
+        }
+
     }
 }

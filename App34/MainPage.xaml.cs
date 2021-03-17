@@ -1,5 +1,4 @@
-﻿using App34.Helpers.RoamingSettings;
-using Microsoft.Toolkit.Graph.Providers;
+﻿using Microsoft.Toolkit.Graph.Providers;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Controls;
 
@@ -10,8 +9,6 @@ namespace App34
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        public RoamingSettingsHelper _roamingSettings;
-
         public MainPage()
         {
             InitializeComponent();

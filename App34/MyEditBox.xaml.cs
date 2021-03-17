@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.System;
@@ -16,6 +18,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Documents;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
@@ -154,14 +157,9 @@ namespace App34
                     };
                 }
 
-                if (line is TodoTextItem)
+                if (line is TodoTextItem item)
                 {
-                    var check = new CheckBox()
-                    {
-                        Content = text
-                    };
-
-                    root.Children.Add(check);
+                    root.Children.Add(renderTodoItem(text, item));
                 }
                 else
                 {
@@ -200,6 +198,31 @@ namespace App34
 
 
             return textBlock;
+        }
+
+        FrameworkElement renderTodoItem(FrameworkElement content, TodoTextItem item)
+        {
+            var stack = new StackPanel()
+            {
+                Orientation = Orientation.Horizontal,
+                VerticalAlignment = VerticalAlignment.Top,
+                HorizontalAlignment = HorizontalAlignment.Left
+            };
+
+            stack.Children.Add(content);
+            stack.Children.Add(new Image()
+            {
+                Source = new BitmapImage(new Uri("ms-appx:///Assets/todo.png")),
+                Height = 10,
+                Margin = new Thickness() { Left = 10}
+            });
+
+            var check = new CheckBox()
+            {
+                Content = stack
+            };
+
+            return check;
         }
 
         void CoreWindow_PointerPressed(CoreWindow sender, PointerEventArgs args)
@@ -346,8 +369,18 @@ namespace App34
             {
                 // Backspace
                 case VirtualKey.Back:
-                    // If there is a selection, then delete the selection.
-                    if (range.StartCaretPosition == 0 && _currentLine > 0)
+                    if (range.StartCaretPosition == 0 && _content[_currentLine] is TodoTextItem todoItem)
+                    {
+                        // convert todo item to a regular item
+                        _content[_currentLine] = new TextItem()
+                        {
+                            Text = "todo" + todoItem.Text
+                        };
+
+                        range.StartCaretPosition = range.EndCaretPosition = 4;
+                        SetSelectionAndNotify(range);
+                    }
+                    else if (range.StartCaretPosition == 0 && _currentLine > 0)
                     {
                         _currentLine--;
                         range.StartCaretPosition = _content[_currentLine].Text.Length;
@@ -356,7 +389,6 @@ namespace App34
                         _content[_currentLine].Text += _content[_currentLine + 1].Text;
 
                         _content.RemoveAt(_currentLine + 1);
-
 
                         SetSelectionAndNotify(range);
                     }
@@ -465,7 +497,7 @@ namespace App34
             request.Selection = _selection;
         }
 
-        void EditContext_TextUpdating(CoreTextEditContext sender, CoreTextTextUpdatingEventArgs args)
+        async void EditContext_TextUpdating(CoreTextEditContext sender, CoreTextTextUpdatingEventArgs args)
         {
             CoreTextRange range = args.Range;
             string newText = args.Text;
@@ -478,15 +510,32 @@ namespace App34
                 newText +
                 line.Substring(Math.Min(line.Length, range.EndCaretPosition));
 
-            //// You can set the proper font or direction for the updated text based on the language by checking
-            //// args.InputLanguage.  We will not do that in this sample.
+            if (_content[_currentLine].Text.Trim().ToLower().StartsWith("todo:") && _content[_currentLine] is not TodoTextItem)
+            {
+                var todoItem = new TodoTextItem()
+                {
+                    Text = _content[_currentLine].Text.Trim().Substring(5)
+                };
+                // convert item to todo
+                _content.RemoveAt(_currentLine);
+                _content.Insert(_currentLine, todoItem);
+                newSelection.StartCaretPosition = newSelection.EndCaretPosition = 0;
 
-            //// Modify the current selection.
-            newSelection.EndCaretPosition = newSelection.StartCaretPosition;
+                // had to add this to make sure it works
+                await Task.Delay(2);
+                SetSelectionAndNotify(newSelection);
+            }
+            else
+            {
+                //// Modify the current selection.
+                newSelection.EndCaretPosition = newSelection.StartCaretPosition;
 
-            //// Update the selection of the edit context. There is no need to notify the system
-            //// because the system itself changed the selection.
-            SetSelection(newSelection);
+                //// Update the selection of the edit context. There is no need to notify the system
+                //// because the system itself changed the selection.
+                SetSelection(newSelection);
+            }
+
+            
         }
 
         void EditContext_SelectionUpdating(CoreTextEditContext sender, CoreTextSelectionUpdatingEventArgs args)

@@ -5,5 +5,9 @@ namespace App34
     public class TodoTextItem : TextItem
     {
         public string ToDoId { get; set; }
+
+        public Microsoft.Graph.TodoTask GraphTask { get; set; }
+
+        public bool Loading { get; set; }
     }
 }

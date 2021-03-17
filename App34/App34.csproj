@@ -122,13 +122,19 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Common\JsonObjectSerializer.cs" />
+    <Compile Include="Helpers\RoamingSettings\IRoamingSettingsDataStore.cs" />
+    <Compile Include="Helpers\RoamingSettings\OneDriveDataSource.cs" />
+    <Compile Include="Helpers\RoamingSettings\OneDriveDataStore.cs" />
+    <Compile Include="Helpers\RoamingSettings\RoamingSettingsHelper.cs" />
+    <Compile Include="Helpers\RoamingSettings\UserExtensionDataStore.cs" />
+    <Compile Include="Helpers\RoamingSettings\UserExtensionsDataSource.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="MyEditBox.xaml.cs">
       <DependentUpon>MyEditBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="OneDriveDataSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TextItem.cs" />
     <Compile Include="TodoTextItem.cs" />

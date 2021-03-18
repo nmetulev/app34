@@ -11,7 +11,9 @@ namespace App34
     {
         private string _listId;
 
-        public async Task InitializeAsync()
+        private EditBoxTodoClient() { }
+
+        public static async Task<EditBoxTodoClient> CreateAsync()
         {
             var provider = ProviderManager.Instance.GlobalProvider;
             Microsoft.Graph.TodoTaskList todoTaskList = null;
@@ -33,7 +35,10 @@ namespace App34
                 todoTaskList = existingLists[0];
             }
 
-            this._listId = todoTaskList.Id;
+            return new EditBoxTodoClient()
+            {
+                _listId = todoTaskList.Id
+            };
         }
 
         public async Task CompleteTodoAsync(string taskId)

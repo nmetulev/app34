@@ -34,27 +34,26 @@ namespace App34
         bool _internalFocus = false;
         InputPane _inputPane;
 
-        int _currentLine = 0;
+
+        private int _currentLine = 0;
+
+        public int CurrentLine
+        {
+            get { return _currentLine; }
+            set 
+            {
+                var line = _content[_currentLine];
+
+                if (line is TodoTextItem todoItem)
+                {
+                    todoItem.Update();
+                }
+
+                _currentLine = value; 
+            }
+        }
 
         List<TextItem> _content;
-
-        public string GetTextFromContent()
-        {
-            string text = "";
-            foreach (var line in _content)
-            {
-                if (line is TodoTextItem)
-                {
-                    text += "todo: " + line.Text + '\n';
-                }
-                else
-                {
-                    text += line.Text + '\n';
-                }
-            }
-
-            return text;
-        }
 
         // If the _selection starts and ends at the same point,
         // then it represents the location of the caret (insertion point).
@@ -74,28 +73,8 @@ namespace App34
         {
             if (d is MyEditBox editBox)
             {
-                List<TextItem> items = new List<TextItem>();
-
-                foreach (var line in editBox.Text.Split('\n'))
-                {
-                    if (line.Trim().ToLower().StartsWith("todo:"))
-                    {
-                        items.Add(new TodoTextItem()
-                        {
-                            Text = line.Trim().Substring(5).Trim()
-                        });
-                    }
-                    else
-                    {
-                        items.Add(new TextItem()
-                        {
-                            Text = line
-                        });
-                    }
-                }
-
-                editBox._content = items;
-                editBox._currentLine = 0;
+                editBox._content = editBox.GetContentFromText(editBox.Text);
+                editBox.CurrentLine = 0;
 
                 CoreTextRange range;
                 range.StartCaretPosition = range.EndCaretPosition = 0;
@@ -104,7 +83,6 @@ namespace App34
 
                 editBox.RenderContent();
             }
-
         }
 
         public MyEditBox()
@@ -149,6 +127,40 @@ namespace App34
             _editContext.CompositionCompleted += EditContext_CompositionCompleted;
         }
 
+
+        public string GetTextFromContent()
+        {
+            string text = "";
+            foreach (var line in _content)
+            {
+                text += line.ToString() + '\n';
+            }
+
+            return text;
+        }
+
+        private List<TextItem> GetContentFromText(string text)
+        {
+            List<TextItem> items = new List<TextItem>();
+
+            foreach (var line in text.Split('\n'))
+            {
+                if (line.Trim().ToLower().StartsWith("todo:"))
+                {
+                    items.Add(TodoTextItem.Create(line));
+                }
+                else
+                {
+                    items.Add(new TextItem()
+                    {
+                        Text = line
+                    });
+                }
+            }
+
+            return items;
+        }
+
         private void RenderContent()
         {
             CustomEditRoot.Children.Clear();
@@ -162,7 +174,7 @@ namespace App34
                     var line = _content[i];
                     FrameworkElement text;
 
-                    if (_currentLine == i)
+                    if (CurrentLine == i)
                     {
                         text = renderTextWithCaret(line.Text);
                     }
@@ -192,9 +204,16 @@ namespace App34
 
         FrameworkElement renderTextWithCaret(string text)
         {
+            var grid = new Grid()
+            {
+                MaxHeight = 22
+            };
+
             var textBlock = new TextBlock()
             {
-                TextWrapping = TextWrapping.WrapWholeWords
+                TextWrapping = TextWrapping.WrapWholeWords,
+                FontSize = 14,
+                VerticalAlignment = VerticalAlignment.Bottom,
             };
 
             textBlock.Inlines.Add(new Run()
@@ -208,6 +227,8 @@ namespace App34
                 {
                     FontSize = 22,
                     Text = "I",
+                    FontWeight = new Windows.UI.Text.FontWeight() { Weight = 100},
+                    CharacterSpacing = -100
                 });
             }
 
@@ -216,8 +237,10 @@ namespace App34
                 Text = PreserveTrailingSpaces(text.Substring(_selection.EndCaretPosition))
             });
 
+            grid.Children.Add(textBlock);
 
-            return textBlock;
+
+            return grid;
         }
 
         FrameworkElement renderTodoItem(FrameworkElement content, TodoTextItem item)
@@ -325,9 +348,9 @@ namespace App34
         {
             // Modify the internal text store.
 
-            var line = _content[_currentLine].Text;
+            var line = _content[CurrentLine].Text;
 
-            _content[_currentLine].Text = line.Substring(0, modifiedRange.StartCaretPosition) +
+            _content[CurrentLine].Text = line.Substring(0, modifiedRange.StartCaretPosition) +
               text +
               line.Substring(modifiedRange.EndCaretPosition);
 
@@ -389,10 +412,10 @@ namespace App34
             {
                 // Backspace
                 case VirtualKey.Back:
-                    if (range.StartCaretPosition == 0 && _content[_currentLine] is TodoTextItem todoItem)
+                    if (range.StartCaretPosition == 0 && _content[CurrentLine] is TodoTextItem todoItem)
                     {
                         // convert todo item to a regular item
-                        _content[_currentLine] = new TextItem()
+                        _content[CurrentLine] = new TextItem()
                         {
                             Text = "todo" + todoItem.Text
                         };
@@ -400,15 +423,15 @@ namespace App34
                         range.StartCaretPosition = range.EndCaretPosition = 4;
                         SetSelectionAndNotify(range);
                     }
-                    else if (range.StartCaretPosition == 0 && _currentLine > 0)
+                    else if (range.StartCaretPosition == 0 && CurrentLine > 0)
                     {
-                        _currentLine--;
-                        range.StartCaretPosition = _content[_currentLine].Text.Length;
+                        CurrentLine--;
+                        range.StartCaretPosition = _content[CurrentLine].Text.Length;
                         range.EndCaretPosition = range.StartCaretPosition;
 
-                        _content[_currentLine].Text += _content[_currentLine + 1].Text;
+                        _content[CurrentLine].Text += _content[CurrentLine + 1].Text;
 
-                        _content.RemoveAt(_currentLine + 1);
+                        _content.RemoveAt(CurrentLine + 1);
 
                         SetSelectionAndNotify(range);
                     }
@@ -422,11 +445,11 @@ namespace App34
                 // Left arrow
                 case VirtualKey.Left:
                     // There was no selection. Move the caret left one code unit if possible.
-                    if (range.StartCaretPosition == 0 && _currentLine > 0)
+                    if (range.StartCaretPosition == 0 && CurrentLine > 0)
                     {
                         // move to previous line
-                        _currentLine--;
-                        range.StartCaretPosition = _content[_currentLine].Text.Length;
+                        CurrentLine--;
+                        range.StartCaretPosition = _content[CurrentLine].Text.Length;
                         range.EndCaretPosition = range.StartCaretPosition;
                     }
                     else
@@ -440,16 +463,16 @@ namespace App34
                 // Right arrow
                 case VirtualKey.Right:
                     // There was no selection. Move the caret right one code unit if possible.
-                    if (range.StartCaretPosition == _content[_currentLine].Text.Length && _currentLine < _content.Count - 1)
+                    if (range.StartCaretPosition == _content[CurrentLine].Text.Length && CurrentLine < _content.Count - 1)
                     {
                         // move to next line
-                        _currentLine++;
+                        CurrentLine++;
                         range.StartCaretPosition = 0;
                         range.EndCaretPosition = range.StartCaretPosition;
                     }
                     else
                     {
-                        range.StartCaretPosition = Math.Min(_content[_currentLine].Text.Length, range.StartCaretPosition + 1);
+                        range.StartCaretPosition = Math.Min(_content[CurrentLine].Text.Length, range.StartCaretPosition + 1);
                         range.EndCaretPosition = range.StartCaretPosition;
                     }
                     SetSelectionAndNotify(range);
@@ -457,15 +480,15 @@ namespace App34
 
                 case VirtualKey.Down:
 
-                    if (_currentLine < _content.Count - 1)
+                    if (CurrentLine < _content.Count - 1)
                     {
-                        //if (_content[_currentLine] is TodoTextItem item)
+                        //if (_content[CurrentLine] is TodoTextItem item)
                         //{
                         //    item.Update();
                         //}
 
-                        _currentLine++;
-                        range.StartCaretPosition = Math.Min(_content[_currentLine].Text.Length, range.StartCaretPosition);
+                        CurrentLine++;
+                        range.StartCaretPosition = Math.Min(_content[CurrentLine].Text.Length, range.StartCaretPosition);
                         range.EndCaretPosition = range.StartCaretPosition;
                         SetSelectionAndNotify(range);
                     }
@@ -474,15 +497,15 @@ namespace App34
 
                 case VirtualKey.Up:
 
-                    if (_currentLine > 0)
+                    if (CurrentLine > 0)
                     {
-                        //if (_content[_currentLine] is TodoTextItem item)
+                        //if (_content[CurrentLine] is TodoTextItem item)
                         //{
                         //    item.Update();
                         //}
 
-                        _currentLine--;
-                        range.StartCaretPosition = Math.Min(_content[_currentLine].Text.Length, range.StartCaretPosition);
+                        CurrentLine--;
+                        range.StartCaretPosition = Math.Min(_content[CurrentLine].Text.Length, range.StartCaretPosition);
                         range.EndCaretPosition = range.StartCaretPosition;
                         SetSelectionAndNotify(range);
                     }
@@ -491,24 +514,24 @@ namespace App34
 
                 case VirtualKey.Enter:
 
-                    var line = _content[_currentLine].Text;
+                    var line = _content[CurrentLine].Text;
 
                     var left = line.Substring(0, _selection.StartCaretPosition);
                     var right = line.Substring(_selection.EndCaretPosition);
 
-                    _content[_currentLine].Text = left;
+                    _content[CurrentLine].Text = left;
 
-                    _content.Insert(_currentLine + 1, new TextItem()
+                    _content.Insert(CurrentLine + 1, new TextItem()
                     {
                         Text = right
                     });
 
-                    if (_content[_currentLine] is TodoTextItem item)
+                    if (_content[CurrentLine] is TodoTextItem item)
                     {
                         item.Update();
                     }
 
-                    _currentLine++;
+                    CurrentLine++;
 
                     range.StartCaretPosition = 0;
                     range.EndCaretPosition = range.StartCaretPosition;
@@ -521,7 +544,7 @@ namespace App34
         void EditContext_TextRequested(CoreTextEditContext sender, CoreTextTextRequestedEventArgs args)
         {
             CoreTextTextRequest request = args.Request;
-            var text = _content[_currentLine].Text;
+            var text = _content[CurrentLine].Text;
             request.Text = text.Substring(
                 request.Range.StartCaretPosition,
                 Math.Min(request.Range.EndCaretPosition, text.Length) - request.Range.StartCaretPosition);
@@ -539,22 +562,22 @@ namespace App34
             string newText = args.Text;
             CoreTextRange newSelection = args.NewSelection;
 
-            var line = _content[_currentLine].Text;
+            var line = _content[CurrentLine].Text;
 
             //// Modify the internal text store.
-            _content[_currentLine].Text = line.Substring(0, range.StartCaretPosition) +
+            _content[CurrentLine].Text = line.Substring(0, range.StartCaretPosition) +
                 newText +
                 line.Substring(Math.Min(line.Length, range.EndCaretPosition));
 
-            if (_content[_currentLine].Text.Trim().ToLower().StartsWith("todo:") && _content[_currentLine] is not TodoTextItem)
+            if (_content[CurrentLine].Text.Trim().ToLower().StartsWith("todo:") && _content[CurrentLine] is not TodoTextItem)
             {
                 var todoItem = new TodoTextItem()
                 {
-                    Text = _content[_currentLine].Text.Trim().Substring(5)
+                    Text = _content[CurrentLine].Text.Trim().Substring(5)
                 };
                 // convert item to todo
-                _content.RemoveAt(_currentLine);
-                _content.Insert(_currentLine, todoItem);
+                _content.RemoveAt(CurrentLine);
+                _content.Insert(CurrentLine, todoItem);
                 newSelection.StartCaretPosition = newSelection.EndCaretPosition = 0;
 
                 // had to add this to make sure it works

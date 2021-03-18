@@ -12,5 +12,9 @@ namespace App34
             set { _text = value; }
         }
 
+        public override string ToString()
+        {
+            return Text;
+        }
     }
 }

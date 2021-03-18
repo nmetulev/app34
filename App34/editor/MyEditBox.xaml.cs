@@ -263,7 +263,8 @@ namespace App34
 
             Binding b = new Binding();
             b.Mode = BindingMode.OneWay;
-            b.Source = item.Text;
+            b.Source = item;
+            b.Path = new PropertyPath(nameof(item.Text));
             content.SetBinding(TextBlock.TextProperty, b);
 
             var check = new CheckBox()

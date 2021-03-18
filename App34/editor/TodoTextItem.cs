@@ -29,6 +29,7 @@ namespace App34
                 _isDirty = true;
                 Debug.WriteLine("isDirty");
                 base.Text = value;
+
             }
         }
 

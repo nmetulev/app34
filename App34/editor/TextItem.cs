@@ -4,7 +4,7 @@ namespace App34
 {
     public class TextItem
     {
-        private string _text;
+        private string _text = string.Empty;
 
         public virtual string Text
         {

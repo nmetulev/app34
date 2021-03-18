@@ -18,15 +18,21 @@
         </Grid.RowDefinitions>
         <TextBlock Text="My Note taking app"></TextBlock>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Padding="8">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="4">
             <graphcontrols:LoginButton/>
             <Button Click="SaveButton_Click">
-                <Button.Content>
-                    <SymbolIcon Symbol="Save" />
-                </Button.Content>
+                <SymbolIcon Symbol="Save" />
             </Button>
+            <ToggleButton x:Name="SettingsToggleButton">
+                <SymbolIcon Symbol="Setting" />
+            </ToggleButton>
         </StackPanel>
         
         <local:MyEditBox Grid.Row="2" x:Name="myEditBox" Text="{Binding Text, Mode=TwoWay}"></local:MyEditBox>
+
+        <Grid x:Name="SettingsPanel" Visibility="{x:Bind SettingsToggleButton.IsChecked, Mode=OneWay}" HorizontalAlignment="Right"
+              Background="{ThemeResource SystemControlBaseHighAcrylicElementMediumHighBrush}" CornerRadius="4" Padding="8" Width="300" VerticalAlignment="Stretch" Grid.RowSpan="3">
+            <TextBlock Text="Settings"></TextBlock>
+        </Grid>
     </Grid>
 </Page>

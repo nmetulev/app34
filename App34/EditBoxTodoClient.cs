@@ -1,4 +1,5 @@
-﻿using Microsoft.Toolkit.Graph.Providers;
+﻿using Microsoft.Graph;
+using Microsoft.Toolkit.Graph.Providers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace App34
         private string _listId;
 
         private EditBoxTodoClient() { }
+
 
         public static async Task<EditBoxTodoClient> CreateAsync()
         {
@@ -39,6 +41,13 @@ namespace App34
             {
                 _listId = todoTaskList.Id
             };
+        }
+
+        public async Task<TodoTask> GetTaskAsync(string taskId)
+        {
+            var provider = ProviderManager.Instance.GlobalProvider;
+            return await provider.Graph.Me.Todo.Lists[this._listId].Tasks[taskId].Request().GetAsync();
+
         }
 
         public async Task CompleteTodoAsync(string taskId)

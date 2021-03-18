@@ -1,4 +1,5 @@
-﻿using Windows.UI.Xaml.Controls;
+﻿using System.Threading.Tasks;
+using Windows.UI.Xaml.Controls;
 
 namespace App34
 {
@@ -10,8 +11,12 @@ namespace App34
         public MainPage()
         {
             InitializeComponent();
-
             DataContext = new MainViewModel();
+            _ = BindTodoClient();
+        }
+
+        public async Task BindTodoClient() {
+            myEditBox.TodoClient = await EditBoxTodoClient.CreateAsync();
         }
 
         private void SaveButton_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)

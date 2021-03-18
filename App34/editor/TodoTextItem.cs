@@ -1,5 +1,6 @@
 ﻿// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
+using Microsoft.Graph;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -41,12 +42,12 @@ namespace App34
             return _isCompleted;
         }
 
-        public async Task<bool> Update()
+        public async Task<bool> Update(IEditBoxTodoClient editBoxTodoClient)
         {
             // todo: semaphore
             if (this._state == TodoItemState.NotCreated)
             {
-                this.CreateGraphTodoItem();
+                this.CreateGraphTodoItem(editBoxTodoClient);
             }
             else if (this._isDirty)
             {
@@ -61,41 +62,45 @@ namespace App34
             return false;
         }
 
-        public async Task<bool> CreateGraphTodoItem()
+        public string ToDoId { get; set; }
+
+        public async Task<bool> CreateGraphTodoItem(IEditBoxTodoClient editBoxTodoClient)
         {
             this._state = TodoItemState.Loading;
             Debug.WriteLine("need to create todo");
+            ToDoId = await editBoxTodoClient.CreateTodoAsync(this.Text);
             this._state = TodoItemState.Created;
             this._isDirty = false;
             return false;
         }
-
-        public string ToDoId { get; set; }
-
         public override string ToString()
         {
-            var json = JsonSerializer.Serialize<MiniTodoModel>(new MiniTodoModel()
-            {
-                title = this.Text,
-                id = this.ToDoId
-            });
-
-
-            return "todo:" + json;
+            return "todo:" + this.ToDoId;
         }
 
-        public static TodoTextItem Create(string text)
+        //Get TODO by ID and create TodoTextItem
+        public static TodoTextItem Create(string text, IEditBoxTodoClient TodoClient)
         {
             // there should probably be some validation here
-            var json = text.Trim().Substring(5);
-            var item = JsonSerializer.Deserialize<MiniTodoModel>(json);
+            var id = text.Trim().Substring(5);
+            TodoTextItem todoTextItem = new TodoTextItem 
+            {
+                Text = "Loading",
+                _state = TodoItemState.Loading
+            };
+
+            var TodoItem = new Task(async () => 
+            { 
+                TodoTask todoTask = await TodoClient.GetTaskAsync(id);
+                todoTextItem.Text = todoTask.Title;
+                todoTextItem._state = TodoItemState.Created;
+            });
+            TodoItem.Start();
+            //TodoClient.GetTaskAsync(id);
 
             //todo: take id and fetch from graph if there, set state to loading while fetching
 
-            return new TodoTextItem()
-            {
-                Text = item.title
-            };
+            return todoTextItem;
         }
 
         struct MiniTodoModel

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -29,7 +30,7 @@ namespace App34
     {
 
         CoreTextEditContext _editContext;
-
+        public IEditBoxTodoClient TodoClient { get; set; }
         CoreWindow _coreWindow;
         bool _internalFocus = false;
         InputPane _inputPane;
@@ -46,7 +47,7 @@ namespace App34
 
                 if (line is TodoTextItem todoItem)
                 {
-                    todoItem.Update();
+                    todoItem.Update(TodoClient);
                 }
 
                 _currentLine = value; 
@@ -147,7 +148,7 @@ namespace App34
             {
                 if (line.Trim().ToLower().StartsWith("todo:"))
                 {
-                    items.Add(TodoTextItem.Create(line));
+                    items.Add(TodoTextItem.Create(line, TodoClient));
                 }
                 else
                 {
@@ -172,7 +173,7 @@ namespace App34
                 for (int i = 0; i < _content.Count; i++)
                 {
                     var line = _content[i];
-                    FrameworkElement text;
+                    TextBlock text;
 
                     if (CurrentLine == i)
                     {
@@ -202,7 +203,7 @@ namespace App34
             CustomEditRoot.Children.Add(root);
         }
 
-        FrameworkElement renderTextWithCaret(string text)
+        TextBlock renderTextWithCaret(string text)
         {
             var grid = new Grid()
             {
@@ -237,13 +238,10 @@ namespace App34
                 Text = PreserveTrailingSpaces(text.Substring(_selection.EndCaretPosition))
             });
 
-            grid.Children.Add(textBlock);
-
-
-            return grid;
+            return textBlock;
         }
 
-        FrameworkElement renderTodoItem(FrameworkElement content, TodoTextItem item)
+        FrameworkElement renderTodoItem(TextBlock content, TodoTextItem item)
         {
             var stack = new StackPanel()
             {
@@ -259,6 +257,11 @@ namespace App34
                 Height = 10,
                 Margin = new Thickness() { Left = 10}
             });
+
+            Binding b = new Binding();
+            b.Mode = BindingMode.OneWay;
+            b.Source = item.Text;
+            content.SetBinding(TextBlock.TextProperty, b);
 
             var check = new CheckBox()
             {
@@ -525,11 +528,6 @@ namespace App34
                     {
                         Text = right
                     });
-
-                    if (_content[CurrentLine] is TodoTextItem item)
-                    {
-                        item.Update();
-                    }
 
                     CurrentLine++;
 

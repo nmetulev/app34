@@ -18,9 +18,9 @@
         </Grid.RowDefinitions>
         <TextBlock Text="My Note taking app"></TextBlock>
 
-        <StackPanel Orientation="Horizontal" Padding="8">
-            <graphcontrols:LoginButton Grid.Row="1"></graphcontrols:LoginButton>
-            <Button Command="{Binding SaveCommand}">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Padding="8">
+            <graphcontrols:LoginButton/>
+            <Button Click="SaveButton_Click">
                 <Button.Content>
                     <SymbolIcon Symbol="Save" />
                 </Button.Content>

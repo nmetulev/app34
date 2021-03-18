@@ -1,7 +1,6 @@
 ﻿using App34.Helpers.RoamingSettings;
 using Microsoft.Toolkit.Graph.Providers;
 using Microsoft.Toolkit.Graph.Providers.Uwp;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -9,27 +8,6 @@ using System.Windows.Input;
 
 namespace App34
 {
-    public class DelegateCommand : ICommand
-    {
-        public event EventHandler CanExecuteChanged;
-
-        Action _action;
-        public DelegateCommand(Action action)
-        {
-            _action = action;
-        }
-
-        public bool CanExecute(object parameter)
-        {
-            return _action != null;
-        }
-
-        public void Execute(object parameter)
-        {
-            _action.Invoke();
-        }
-    }
-
     public class MainViewModel : INotifyPropertyChanged
     {
         const string NotesFileName = "my_notes.json";
@@ -59,7 +37,12 @@ namespace App34
         {
             if (_roamingSettings != null)
             {
-                await _roamingSettings.SaveFileAsync(NotesFileName, Text);
+                var noteModel = new NoteModel()
+                {
+                    Notes = Text
+                };
+
+                await _roamingSettings.SaveFileAsync(NotesFileName, noteModel);
             }
         }
 
@@ -82,7 +65,8 @@ namespace App34
             bool notesExist = await _roamingSettings.FileExistsAsync(NotesFileName);
             if (notesExist)
             {
-                Text = await _roamingSettings.ReadFileAsync(NotesFileName, string.Empty);
+                var noteModel = await _roamingSettings.ReadFileAsync<NoteModel>(NotesFileName);
+                Text = noteModel.Notes;
             }
             else
             {
@@ -93,7 +77,7 @@ namespace App34
         private void Clear()
         {
             _roamingSettings = null;
-            _text = null;
+            Text = null;
         }
 
         private void Set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)

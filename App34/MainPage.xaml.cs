@@ -1,6 +1,4 @@
-﻿using Microsoft.Toolkit.Graph.Providers;
-using System.Threading.Tasks;
-using Windows.UI.Xaml.Controls;
+﻿using Windows.UI.Xaml.Controls;
 
 namespace App34
 {
@@ -16,5 +14,12 @@ namespace App34
             DataContext = new MainViewModel();
         }
 
+        private void SaveButton_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            var vm = DataContext as MainViewModel;
+            vm.Text = myEditBox.GetTextFromContent();
+
+            vm.SaveCommand.Execute(null);
+        }
     }
 }

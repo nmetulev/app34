@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using App34.Common;
 using Microsoft.Toolkit.Uwp.Helpers;
@@ -194,7 +195,7 @@ namespace App34.Helpers.RoamingSettings
         {
             try
             {
-                var roamingSettings = await Retrieve<object>(_fileWithExtension);
+                var roamingSettings = await Retrieve<object>(filePath);
                 return roamingSettings != null;
             }
             catch

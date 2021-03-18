@@ -92,9 +92,6 @@ namespace App34.Helpers.RoamingSettings
             return userExtension;
         }
 
-        /// <inheritdoc />
-        public string Name => _extensionId;
-
         /// <summary>
         /// Gets the id of the Graph User.
         /// </summary>
@@ -264,6 +261,12 @@ namespace App34.Helpers.RoamingSettings
 
         /// <inheritdoc />
         public Task<StorageFile> SaveFileAsync<T>(string filePath, T value)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public Task<string> ReadFileAsync(string filePath, string @default = null)
         {
             throw new NotImplementedException();
         }

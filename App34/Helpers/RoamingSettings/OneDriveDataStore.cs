@@ -1,8 +1,7 @@
-﻿using System;
+﻿using App34.Common;
+using Microsoft.Toolkit.Uwp.Helpers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using App34.Common;
-using Microsoft.Toolkit.Uwp.Helpers;
 using Windows.Storage;
 
 namespace App34.Helpers.RoamingSettings
@@ -34,6 +33,16 @@ namespace App34.Helpers.RoamingSettings
         }
 
         /// <summary>
+        /// Get the contents of a file as a string.
+        /// </summary>
+        /// <param name="fileWithExt">The file name with extension.</param>
+        /// <returns>A task with the file contents as a string.</returns>
+        public static async Task<string> Retrieve(string fileWithExt)
+        {
+            return await OneDriveDataSource.Retrieve(fileWithExt);
+        }
+
+        /// <summary>
         /// Update the contents of a remote file.
         /// </summary>
         /// <typeparam name="T">The type of object to store in the file.</typeparam>
@@ -57,8 +66,6 @@ namespace App34.Helpers.RoamingSettings
 
         /// <inheritdoc />
         public IDictionary<string, object> Settings => _syncData;
-
-        public string Name => _fileWithExtension;
 
         private string _fileWithExtension;
         private IDictionary<string, object> _syncData;
@@ -195,7 +202,7 @@ namespace App34.Helpers.RoamingSettings
         {
             try
             {
-                var roamingSettings = await Retrieve<object>(filePath);
+                var roamingSettings = await Retrieve(filePath);
                 return roamingSettings != null;
             }
             catch
@@ -208,6 +215,12 @@ namespace App34.Helpers.RoamingSettings
         public async Task<T> ReadFileAsync<T>(string filePath, T @default = default)
         {
             return await Retrieve<T>(filePath) ?? @default;
+        }
+
+        /// <inheritdoc />
+        public async Task<string> ReadFileAsync(string filePath, string @default = default)
+        {
+            return await Retrieve(filePath) ?? @default;
         }
 
         /// <inheritdoc />

@@ -41,7 +41,7 @@ namespace App34
         public int CurrentLine
         {
             get { return _currentLine; }
-            set 
+            set
             {
                 var line = _content[_currentLine];
 
@@ -50,11 +50,14 @@ namespace App34
                     todoItem.Update(TodoClient);
                 }
 
-                _currentLine = value; 
+                _currentLine = value;
             }
         }
 
-        List<TextItem> _content;
+        List<TextItem> _content = new List<TextItem>()
+        {
+            new TextItem()
+        };
 
         // If the _selection starts and ends at the same point,
         // then it represents the location of the caret (insertion point).

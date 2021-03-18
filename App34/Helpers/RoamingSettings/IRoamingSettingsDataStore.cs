@@ -14,11 +14,6 @@ namespace App34.Helpers.RoamingSettings
     public interface IRoamingSettingsDataStore : IObjectStorageHelper
     {
         /// <summary>
-        /// The name of the data storage container.
-        /// </summary>
-        string Name { get; }
-
-        /// <summary>
         /// Gets access to the key/value pairs cache directly.
         /// </summary>
         IDictionary<string, object> Settings { get; }
@@ -40,5 +35,13 @@ namespace App34.Helpers.RoamingSettings
         /// </summary>
         /// <returns>A Task.</returns>
         Task Sync();
+
+        /// <summary>
+        /// Read file contents as a string.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="default"></param>
+        /// <returns></returns>
+        Task<string> ReadFileAsync(string filePath, string @default = default);
     }
 }

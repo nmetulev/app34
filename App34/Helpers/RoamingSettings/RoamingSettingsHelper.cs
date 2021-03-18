@@ -33,7 +33,7 @@ namespace App34.Helpers.RoamingSettings
     /// </summary>
     public class RoamingSettingsHelper : IRoamingSettingsDataStore
     {
-        public string Name => DataStore.Name;
+        //public string Name => DataStore.Name;
 
         /// <summary>
         /// Gets the internal data storage helper instance.
@@ -136,10 +136,13 @@ namespace App34.Helpers.RoamingSettings
         public T Read<T>(string key, T @default = default) => DataStore.Read<T>(key, @default);
 
         /// <inheritdoc />
-        public T Read<T>(string compositeKey, string key, T @default = default) => DataStore.Read<T>(compositeKey, key, @default);
+        public T Read<T>(string compositeKey, string key, T @default = default) => DataStore.Read(compositeKey, key, @default);
 
         /// <inheritdoc />
-        public Task<T> ReadFileAsync<T>(string filePath, T @default = default) => DataStore.ReadFileAsync<T>(filePath, @default);
+        public Task<T> ReadFileAsync<T>(string filePath, T @default = default) => DataStore.ReadFileAsync(filePath, @default);
+        
+        /// <inheritdoc />
+        public Task<string> ReadFileAsync(string filePath, string @default = default) => DataStore.ReadFileAsync(filePath, @default);
 
         /// <inheritdoc />
         public void Save<T>(string key, T value) => DataStore.Save<T>(key, value);

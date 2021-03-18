@@ -139,7 +139,6 @@
     <Compile Include="MyEditBox.xaml.cs">
       <DependentUpon>MyEditBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="NoteModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TextItem.cs" />
     <Compile Include="TodoTextItem.cs" />

@@ -37,12 +37,7 @@ namespace App34
         {
             if (_roamingSettings != null)
             {
-                var noteModel = new NoteModel()
-                {
-                    Notes = Text
-                };
-
-                await _roamingSettings.SaveFileAsync(NotesFileName, noteModel);
+                await _roamingSettings.SaveFileAsync(NotesFileName, Text);
             }
         }
 
@@ -63,15 +58,10 @@ namespace App34
             _roamingSettings = await RoamingSettingsHelper.CreateForCurrentUser(RoamingDataStore.OneDrive);
 
             bool notesExist = await _roamingSettings.FileExistsAsync(NotesFileName);
-            if (notesExist)
-            {
-                var noteModel = await _roamingSettings.ReadFileAsync<NoteModel>(NotesFileName);
-                Text = noteModel.Notes;
-            }
-            else
-            {
-                Text = string.Empty;
-            }
+
+            Text = notesExist
+                ? await _roamingSettings.ReadFileAsync(NotesFileName)
+                : string.Empty;
         }
 
         private void Clear()

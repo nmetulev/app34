@@ -3,7 +3,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Graph;
 using Microsoft.Toolkit.Graph.Providers;
-using Windows.Storage;
 
 namespace App34.Helpers.RoamingSettings
 {
@@ -39,9 +38,12 @@ namespace App34.Helpers.RoamingSettings
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public static async Task<DriveItem> Update<T>(string fileWithExt, T fileContents)
         {
-            var json = Graph.HttpProvider.Serializer.SerializeObject(fileContents);
-            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            var contents = (fileContents is string stringContents)
+                ? stringContents
+                : Graph.HttpProvider.Serializer.SerializeObject(fileContents);
 
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(contents));
+            
             return await Graph.Me.Drive.Special.AppRoot.ItemWithPath(fileWithExt).Content.Request().PutAsync<DriveItem>(stream);
         }
 
@@ -55,6 +57,18 @@ namespace App34.Helpers.RoamingSettings
             Stream stream = await Graph.Me.Drive.Special.AppRoot.ItemWithPath(fileWithExt).Content.Request().GetAsync();
 
             return Graph.HttpProvider.Serializer.DeserializeObject<T>(stream);
+        }
+
+        /// <summary>
+        /// Get a file from the remote.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public static async Task<string> Retrieve(string fileWithExt)
+        {
+            Stream stream = await Graph.Me.Drive.Special.AppRoot.ItemWithPath(fileWithExt).Content.Request().GetAsync();
+
+            StreamReader reader = new StreamReader(stream);
+            return reader.ReadToEnd();
         }
 
         /// <summary>
